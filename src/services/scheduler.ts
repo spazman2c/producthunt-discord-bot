@@ -136,17 +136,19 @@ export class Scheduler {
   async triggerManualUpdate(): Promise<void> {
     logger.info('Manual update triggered');
     try {
-      // Create a temporary schedule for manual trigger
-      const tempSchedule: DailySchedule = {
-        date: this.timezoneManager.getCurrentPHDate().toISODate() || '',
-        nextFetchTime: this.timezoneManager.getCurrentPHDate(),
-        isActive: true,
-        totalPolls: 0,
-        lastPollTime: null,
-        lastChangeTime: null,
-      };
+      // Use existing schedule or create one if it doesn't exist
+      if (!this.currentSchedule) {
+        const currentDate = this.timezoneManager.getPHDateString();
+        this.currentSchedule = {
+          date: currentDate,
+          nextFetchTime: this.timezoneManager.getCurrentPHDate(),
+          isActive: true,
+          totalPolls: 0,
+          lastPollTime: null,
+          lastChangeTime: null,
+        };
+      }
       
-      this.currentSchedule = tempSchedule;
       const result = await this.performPoll();
       
       logger.info('Manual update completed successfully', {
@@ -246,6 +248,7 @@ export class Scheduler {
    */
   private scheduleNextPoll(): void {
     if (!this.isRunning || !this.currentSchedule) {
+      logger.warn('Cannot schedule next poll - scheduler not running or no current schedule');
       return;
     }
 
@@ -272,6 +275,8 @@ export class Scheduler {
         }
         // Always schedule next poll, even if current poll failed
         this.scheduleNextPoll();
+      } else {
+        logger.warn('Scheduler stopped, not scheduling next poll');
       }
     }, delayMs);
 
