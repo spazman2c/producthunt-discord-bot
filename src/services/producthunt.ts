@@ -130,8 +130,19 @@ export class ProductHuntAPI {
               fullResponse: JSON.stringify(result, null, 2),
             });
 
-            // Check for GraphQL errors
+            // Check for rate limit errors first
             if (result.errors && result.errors.length > 0) {
+              const rateLimitError = result.errors.find(error => 
+                error.message?.includes('rate_limit_reached') || 
+                error.message?.includes('429')
+              );
+              
+              if (rateLimitError) {
+                logger.warn('Product Hunt API rate limit reached, will retry later');
+                throw new Error('RATE_LIMIT_EXCEEDED');
+              }
+
+              // Check for other GraphQL errors
               const errorMessages = result.errors.map((e) => e.message).join(', ');
               logger.error('Product Hunt GraphQL errors:', result.errors);
               throw new Error(`GraphQL errors: ${errorMessages}`);
@@ -146,10 +157,10 @@ export class ProductHuntAPI {
             return result;
           },
           {
-            retries: 2, // Fewer retries per query variation
+            retries: 1, // Reduce retries to avoid hitting rate limit
             factor: 2,
-            minTimeout: 1000,
-            maxTimeout: 5000,
+            minTimeout: 2000, // Longer delay
+            maxTimeout: 10000,
           }
         );
 
@@ -200,6 +211,13 @@ export class ProductHuntAPI {
 
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
+        
+        // Check if it's a rate limit error
+        if (lastError.message.includes('RATE_LIMIT_EXCEEDED')) {
+          logger.warn('Product Hunt API rate limit exceeded, stopping all query attempts');
+          throw new Error('Product Hunt API rate limit exceeded. Please wait 6-10 minutes before trying again.');
+        }
+        
         logger.warn(`Product Hunt API query variation ${i + 1} failed:`, lastError.message);
         
         // If this is the last query variation, throw the error
