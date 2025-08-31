@@ -1,5 +1,4 @@
-import { EmbedBuilder, TextChannel } from 'discord.js';
-import { TransformedPost } from './producthunt';
+// Discord bot types
 
 export interface DiscordMessageData {
   messageId: string;

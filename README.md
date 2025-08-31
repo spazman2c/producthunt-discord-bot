@@ -95,6 +95,15 @@ npm start
 # Test Product Hunt API (requires valid PH_TOKEN)
 npm run test:ph
 
+# Test Discord Bot (requires valid DISCORD_TOKEN and DISCORD_CHANNEL_ID)
+npm run test:discord
+
+# Test State Manager
+npm run test:state
+
+# Test Scheduler (requires all services configured)
+npm run test:scheduler
+
 # Lint code
 npm run lint
 

@@ -1,11 +1,4 @@
-import {
-  Client,
-  GatewayIntentBits,
-  TextChannel,
-  EmbedBuilder,
-  Message,
-  ActivityType,
-} from 'discord.js';
+import { Client, GatewayIntentBits, TextChannel, EmbedBuilder, ActivityType } from 'discord.js';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 import { TransformedPost } from '../types/producthunt';
@@ -233,9 +226,9 @@ export class DiscordBot {
   async testConnection(): Promise<boolean> {
     try {
       logger.info('Testing Discord connection...');
-      
+
       const channel = await this.getChannel();
-      
+
       // Test if we can send messages
       const testMessage = await channel.send('🔄 Testing bot connection...');
       await testMessage.delete();
@@ -253,8 +246,8 @@ export class DiscordBot {
    */
   getStatus(): {
     isReady: boolean;
-    botName?: string;
-    botId?: string;
+    botName?: string | undefined;
+    botId?: string | undefined;
     channelId: string;
   } {
     return {
