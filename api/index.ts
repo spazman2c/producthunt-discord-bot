@@ -1,9 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { MonitoringServer } from '../src/server';
 import { healthChecker } from '../src/health';
 
-// Initialize monitoring server
-const monitoringServer = new MonitoringServer(3000);
+// Health checker is already initialized as a singleton
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const url = req.url || '/';

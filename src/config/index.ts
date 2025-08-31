@@ -10,19 +10,16 @@ function validateConfig(): AppConfig {
     'PH_TOKEN',
     'DISCORD_TOKEN',
     'DISCORD_CHANNEL_ID',
-    'PH_TIMEZONE',
-    'BOT_TIMEZONE',
-    'FETCH_AT_LOCAL',
-    'POLL_SECONDS',
-    'LOG_LEVEL',
   ];
 
   const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
   if (missingVars.length > 0) {
+    console.error('Missing required environment variables:', missingVars);
+    console.error('Please set these environment variables in your Vercel project settings');
     throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
   }
 
-  const pollSeconds = parseInt(process.env.POLL_SECONDS!, 10);
+  const pollSeconds = parseInt(process.env.POLL_SECONDS || '180', 10);
   if (isNaN(pollSeconds) || pollSeconds < 30) {
     throw new Error('POLL_SECONDS must be a number >= 30');
   }
@@ -37,13 +34,13 @@ function validateConfig(): AppConfig {
       channelId: process.env.DISCORD_CHANNEL_ID!,
     },
     time: {
-      phTimezone: process.env.PH_TIMEZONE!,
-      botTimezone: process.env.BOT_TIMEZONE!,
-      fetchAtLocal: process.env.FETCH_AT_LOCAL!,
+      phTimezone: process.env.PH_TIMEZONE || 'America/Los_Angeles',
+      botTimezone: process.env.BOT_TIMEZONE || 'America/New_York',
+      fetchAtLocal: process.env.FETCH_AT_LOCAL || '07:00',
       pollSeconds,
     },
     log: {
-      level: process.env.LOG_LEVEL!,
+      level: process.env.LOG_LEVEL || 'info',
     },
   };
 

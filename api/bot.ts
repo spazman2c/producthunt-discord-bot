@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { config } from '../src/config';
+import { getConfig } from '../src/config/lazy';
 import { logger } from '../src/utils/logger';
 import { ProductHuntAPI } from '../src/services/producthunt';
 import { DiscordBot } from '../src/services/discord';
@@ -44,6 +44,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 async function initializeBot(): Promise<void> {
   logger.info('Initializing Product Hunt Top 5 Discord Bot...');
+
+  // Get configuration (this will load it when needed)
+  const config = getConfig();
 
   // Initialize timezone manager
   const timezoneManager = new TimezoneManager();

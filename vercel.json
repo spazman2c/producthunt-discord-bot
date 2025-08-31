@@ -6,6 +6,9 @@
     },
     "api/bot.ts": {
       "maxDuration": 300
+    },
+    "api/check-env.ts": {
+      "maxDuration": 30
     }
   }
 }
