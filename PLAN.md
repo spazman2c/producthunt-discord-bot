@@ -1,0 +1,297 @@
+# Product Hunt Top 5 Discord Bot — PLAN.md
+
+## Project Overview
+A Discord bot that automatically posts and updates the top 5 Product Hunt launches daily, starting at 7:00 AM and refreshing vote counts throughout the day.
+
+---
+
+## Phase 1: Project Setup & Foundation
+
+### 1.1 Environment Setup
+- [x] Initialize Node.js project with TypeScript
+- [x] Set up project structure and dependencies
+- [x] Configure ESLint and Prettier
+- [x] Create `.env` template and `.gitignore`
+- [x] Set up logging system
+
+### 1.2 Core Dependencies
+- [x] `discord.js` - Discord bot framework
+- [x] `graphql-request` - Product Hunt API client
+- [x] `luxon` - Timezone handling
+- [x] `p-retry` - Retry logic for API calls
+- [x] `dotenv` - Environment variable management
+
+### 1.3 Configuration System
+- [x] Create configuration schema
+- [x] Implement environment variable validation
+- [x] Set up timezone handling (PT for PH, configurable for bot)
+- [x] Create config validation on startup
+
+---
+
+## Phase 2: Product Hunt API Integration
+
+### 2.1 API Client Setup
+- [x] Create Product Hunt GraphQL client
+- [x] Implement authentication with bearer token
+- [x] Set up error handling and retry logic
+- [x] Add rate limiting awareness
+
+### 2.2 Data Fetching
+- [x] Implement GraphQL query for top 5 posts
+- [x] Create data transformation layer
+- [x] Add filtering for "today" (PT timezone)
+- [x] Handle edge cases (fewer than 5 posts)
+
+### 2.3 Query Structure
+```graphql
+query TopToday($first: Int!) {
+  posts(order: RANKING, first: $first) {
+    edges {
+      node {
+        id
+        name
+        tagline
+        slug
+        votesCount
+        url
+        thumbnail { url }
+      }
+    }
+  }
+}
+```
+
+---
+
+## Phase 3: Discord Bot Integration
+
+### 3.1 Bot Setup
+- [ ] Create Discord bot application
+- [ ] Implement bot client with proper intents
+- [ ] Set up event handlers (ready, error, etc.)
+- [ ] Add bot status and activity indicators
+
+### 3.2 Message Management
+- [ ] Create embed builder for top 5 posts
+- [ ] Implement message posting to configured channel
+- [ ] Add message editing functionality
+- [ ] Store and retrieve message IDs for updates
+
+### 3.3 Embed Format
+- [ ] Design rich embed layout
+- [ ] Include rank, name, tagline, vote count, and link
+- [ ] Add thumbnail support (optional)
+- [ ] Include footer with update status
+
+---
+
+## Phase 4: State Management & Caching
+
+### 4.1 Daily State System
+- [ ] Create state management for daily cycles
+- [ ] Implement cache for last observed data
+- [ ] Add state persistence (file-based initially)
+- [ ] Handle state recovery on bot restart
+
+### 4.2 Change Detection
+- [ ] Implement diff logic for vote counts and rankings
+- [ ] Create minimal-diff update system
+- [ ] Add logging for significant changes
+- [ ] Optimize update frequency based on activity
+
+### 4.3 Cache Structure
+```json
+{
+  "2025-01-15": {
+    "discordMessageId": "1234567890",
+    "lastItems": [
+      {"id": "139993", "rank": 1, "votes": 315, "slug": "a01"},
+      {"id": "...", "rank": 2, "votes": 238, "slug": "nuraform"}
+    ]
+  }
+}
+```
+
+---
+
+## Phase 5: Scheduling & Polling System
+
+### 5.1 Daily Scheduling
+- [ ] Implement cron-like scheduling for 7:00 AM start
+- [ ] Add timezone-aware scheduling
+- [ ] Create daily cycle management
+- [ ] Handle timezone transitions
+
+### 5.2 Adaptive Polling
+- [ ] Start with 3-minute polling intervals
+- [ ] Implement adaptive polling based on activity
+- [ ] Add rate limit awareness
+- [ ] Create graceful shutdown at end of day
+
+### 5.3 Polling Logic
+- [ ] Fetch top 5 posts
+- [ ] Compare with cached state
+- [ ] Update Discord message if changes detected
+- [ ] Adjust polling interval based on activity
+
+---
+
+## Phase 6: Error Handling & Resilience
+
+### 6.1 API Error Handling
+- [ ] Implement exponential backoff for retries
+- [ ] Handle Product Hunt API errors (401, 403, 429)
+- [ ] Add graceful degradation for partial data
+- [ ] Create error logging and alerting
+
+### 6.2 Discord Error Handling
+- [ ] Handle Discord rate limits
+- [ ] Implement message editing error recovery
+- [ ] Add channel access validation
+- [ ] Create fallback posting strategies
+
+### 6.3 Startup Safety
+- [ ] Validate configuration on startup
+- [ ] Recover state from cache if available
+- [ ] Resume polling if mid-cycle restart
+- [ ] Prevent duplicate message posting
+
+---
+
+## Phase 7: Testing & Validation
+
+### 7.1 Unit Tests
+- [ ] Test Product Hunt API client
+- [ ] Test Discord embed building
+- [ ] Test state management and caching
+- [ ] Test timezone handling
+
+### 7.2 Integration Tests
+- [ ] Test full daily cycle
+- [ ] Test message updating
+- [ ] Test error recovery scenarios
+- [ ] Test rate limit handling
+
+### 7.3 Manual Testing Checklist
+- [ ] Bot posts at configured time
+- [ ] Vote counts update without duplicates
+- [ ] Order changes trigger clean edits
+- [ ] Handles <5 posts gracefully
+- [ ] Survives restarts without re-posting
+- [ ] Respects rate limits
+
+---
+
+## Phase 8: Deployment & Monitoring
+
+### 8.1 Deployment Setup
+- [ ] Create Docker configuration
+- [ ] Set up environment variable management
+- [ ] Configure logging and monitoring
+- [ ] Add health check endpoints
+
+### 8.2 Monitoring
+- [ ] Add application metrics
+- [ ] Create alerting for failures
+- [ ] Monitor API rate limit usage
+- [ ] Track message update frequency
+
+### 8.3 Documentation
+- [ ] Create README with setup instructions
+- [ ] Document configuration options
+- [ ] Add troubleshooting guide
+- [ ] Create deployment guide
+
+---
+
+## Phase 9: Future Enhancements (Post-MVP)
+
+### 9.1 Advanced Features
+- [ ] Role pings for Makers/Hunters
+- [ ] Per-product discussion threads
+- [ ] Daily summary at end of day
+- [ ] Image-rich embeds with thumbnails
+
+### 9.2 Slash Commands
+- [ ] `/top5` - Show current top 5
+- [ ] `/product <slug>` - Show specific product
+- [ ] `/refresh` - Force manual refresh
+- [ ] `/config` - Show bot configuration
+
+### 9.3 Analytics
+- [ ] Track product performance over time
+- [ ] Generate weekly/monthly reports
+- [ ] Add historical data storage
+- [ ] Create dashboard for insights
+
+---
+
+## Implementation Priority
+
+### High Priority (MVP)
+1. Project setup and configuration
+2. Product Hunt API integration
+3. Discord bot basic functionality
+4. Daily scheduling and polling
+5. Error handling and resilience
+
+### Medium Priority
+1. Advanced state management
+2. Comprehensive testing
+3. Deployment automation
+4. Monitoring and alerting
+
+### Low Priority (Future)
+1. Slash commands
+2. Advanced features
+3. Analytics and reporting
+4. Performance optimizations
+
+---
+
+## Success Criteria
+
+- [ ] Bot posts top 5 Product Hunt launches daily at 7:00 AM
+- [ ] Vote counts update automatically throughout the day
+- [ ] Handles API errors gracefully with retry logic
+- [ ] Survives bot restarts without duplicate posts
+- [ ] Respects both Product Hunt and Discord rate limits
+- [ ] Provides clear logging and monitoring
+- [ ] Easy to configure and deploy
+
+---
+
+## Risk Mitigation
+
+### Technical Risks
+- **API Changes**: Use stable GraphQL fields, implement version checking
+- **Rate Limits**: Implement adaptive polling and backoff strategies
+- **Timezone Issues**: Use robust timezone libraries and testing
+- **State Loss**: Implement persistent caching and recovery
+
+### Operational Risks
+- **Token Security**: Use environment variables, implement token rotation
+- **Discord API Changes**: Use stable Discord.js features
+- **Deployment Issues**: Create comprehensive testing and rollback procedures
+
+---
+
+## Timeline Estimate
+
+- **Phase 1-3**: 1-2 weeks (Foundation)
+- **Phase 4-6**: 1-2 weeks (Core functionality)
+- **Phase 7-8**: 1 week (Testing & Deployment)
+- **Total MVP**: 3-5 weeks
+
+---
+
+## Next Steps
+
+1. Set up project structure and dependencies
+2. Create Product Hunt API client
+3. Implement basic Discord bot functionality
+4. Build state management system
+5. Add scheduling and polling logic
+6. Implement comprehensive error handling
+7. Deploy and test in production environment
