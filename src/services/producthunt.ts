@@ -113,7 +113,7 @@ export class ProductHuntAPI {
             >(query, useVariables || {});
 
             // Log the raw result for debugging
-            logger.debug('Product Hunt API raw result:', {
+            logger.info('Product Hunt API raw result:', {
               queryVariation: i + 1,
               resultType: typeof result,
               resultKeys: Object.keys(result),
@@ -121,7 +121,7 @@ export class ProductHuntAPI {
             });
 
             // Debug: Log the raw response
-            logger.debug('Product Hunt API raw response:', {
+            logger.info('Product Hunt API raw response:', {
               queryVariation: i + 1,
               hasErrors: !!result.errors,
               errorCount: result.errors?.length || 0,
@@ -173,20 +173,23 @@ export class ProductHuntAPI {
           postsKeys: response.data?.posts ? Object.keys(response.data.posts) : [],
         });
 
-        // Validate response structure
-        if (!response.data) {
-          throw new Error('Product Hunt API response missing data property');
-        }
+                    // Handle different response structures
+            let postsData: any;
+            if (response.data && response.data.posts) {
+              // Standard GraphQL response with data wrapper
+              postsData = response.data.posts;
+            } else if ((response as any).posts) {
+              // Direct response without data wrapper
+              postsData = (response as any).posts;
+            } else {
+              throw new Error('Product Hunt API response missing posts property');
+            }
 
-        if (!response.data.posts) {
-          throw new Error('Product Hunt API response missing posts property');
-        }
+            if (!postsData.edges) {
+              throw new Error('Product Hunt API response missing posts.edges property');
+            }
 
-        if (!response.data.posts.edges) {
-          throw new Error('Product Hunt API response missing posts.edges property');
-        }
-
-        const posts = response.data.posts.edges.map((edge, index) => ({
+            const posts = postsData.edges.map((edge: any, index: number) => ({
           id: edge.node.id,
           name: edge.node.name,
           tagline: edge.node.tagline,
@@ -200,7 +203,7 @@ export class ProductHuntAPI {
         logger.info('Successfully fetched top posts', {
           queryVariation: i + 1,
           count: posts.length,
-          posts: posts.map((p) => ({ name: p.name, votes: p.votes, rank: p.rank })),
+          posts: posts.map((p: any) => ({ name: p.name, votes: p.votes, rank: p.rank })),
         });
 
         return {
