@@ -69,8 +69,25 @@ export class Scheduler {
     this.isRunning = true;
     logger.info('Starting scheduler...');
 
-    // Start polling for the current day immediately
-    await this.runDailyCycle();
+    // Start polling immediately for the current day
+    const currentDate = this.timezoneManager.getPHDateString();
+    logger.info('Starting polling for current day', { date: currentDate });
+
+    // Initialize daily schedule
+    this.currentSchedule = {
+      date: currentDate,
+      nextFetchTime: this.timezoneManager.getCurrentPHDate(),
+      isActive: true,
+      totalPolls: 0,
+      lastPollTime: null,
+      lastChangeTime: null,
+    };
+
+    // Reset adaptive polling state
+    this.resetAdaptiveState();
+
+    // Start polling loop immediately
+    await this.startPollingLoop();
 
     // Also schedule the next day's cycle (non-blocking)
     this.scheduleNextDailyCycle();
