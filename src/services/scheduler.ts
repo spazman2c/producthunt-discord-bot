@@ -69,8 +69,8 @@ export class Scheduler {
     this.isRunning = true;
     logger.info('Starting scheduler...');
 
-    // Schedule the next daily cycle
-    await this.scheduleNextDailyCycle();
+    // Start polling for the current day immediately
+    await this.runDailyCycle();
 
     logger.info('Scheduler started successfully');
   }
@@ -186,6 +186,9 @@ export class Scheduler {
 
       // Start polling loop
       await this.startPollingLoop();
+      
+      // Also schedule the next day's cycle
+      await this.scheduleNextDailyCycle();
     } catch (error) {
       logger.error('Error in daily cycle:', error);
 
