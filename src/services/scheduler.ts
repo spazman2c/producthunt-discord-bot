@@ -94,6 +94,36 @@ export class Scheduler {
   }
 
   /**
+   * Trigger a manual update (for testing/debugging)
+   */
+  async triggerManualUpdate(): Promise<void> {
+    logger.info('Manual update triggered');
+    try {
+      // Create a temporary schedule for manual trigger
+      const tempSchedule: DailySchedule = {
+        date: this.timezoneManager.getCurrentPHDate().toISODate() || '',
+        nextFetchTime: this.timezoneManager.getCurrentPHDate(),
+        isActive: true,
+        totalPolls: 0,
+        lastPollTime: null,
+        lastChangeTime: null,
+      };
+      
+      this.currentSchedule = tempSchedule;
+      const result = await this.performPoll();
+      
+      logger.info('Manual update completed successfully', {
+        success: result.success,
+        postsFetched: result.postsFetched,
+        changesDetected: result.changesDetected,
+      });
+    } catch (error) {
+      logger.error('Manual update failed:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Schedule the next daily cycle
    */
   private async scheduleNextDailyCycle(): Promise<void> {

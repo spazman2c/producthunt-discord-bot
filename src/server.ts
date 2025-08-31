@@ -5,9 +5,14 @@ import { healthChecker } from './health';
 export class MonitoringServer {
   private server: http.Server | null = null;
   private port: number;
+  private scheduler: any = null; // Will be set by the main app
 
   constructor(port: number = parseInt(process.env.PORT || '3000')) {
     this.port = port;
+  }
+
+  setScheduler(scheduler: any): void {
+    this.scheduler = scheduler;
   }
 
   /**
@@ -69,6 +74,9 @@ export class MonitoringServer {
         case '/metrics':
           this.handleMetrics(req, res);
           break;
+        case '/trigger':
+          this.handleTrigger(req, res);
+          break;
         case '/':
           this.handleRoot(req, res);
           break;
@@ -105,6 +113,42 @@ export class MonitoringServer {
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(status, null, 2));
+  }
+
+  /**
+   * Handle trigger endpoint
+   */
+  private handleTrigger(req: http.IncomingMessage, res: http.ServerResponse): void {
+    if (req.method !== 'POST') {
+      res.writeHead(405, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Method not allowed. Use POST to trigger the bot.' }));
+      return;
+    }
+
+    if (!this.scheduler) {
+      res.writeHead(503, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Scheduler not available' }));
+      return;
+    }
+
+    try {
+      // Trigger the scheduler to fetch and post
+      this.scheduler.triggerManualUpdate();
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        status: 'success',
+        message: 'Bot triggered successfully',
+        timestamp: new Date().toISOString(),
+      }));
+    } catch (error) {
+      logger.error('Error triggering bot:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        error: 'Failed to trigger bot',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      }));
+    }
   }
 
   /**
