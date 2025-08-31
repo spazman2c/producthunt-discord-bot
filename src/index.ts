@@ -7,6 +7,7 @@ import { Scheduler } from './services/scheduler';
 import { TimezoneManager } from './utils/timezone';
 import { StateManagerConfig } from './types/state';
 import { MonitoringServer } from './server';
+import { healthChecker } from './health';
 
 async function main(): Promise<void> {
   try {
@@ -72,12 +73,18 @@ async function main(): Promise<void> {
     logger.info('Testing Discord connection...');
     const discordTest = await discordBot.testConnection();
     if (!discordTest) {
-      throw new Error('Discord connection failed');
+      logger.warn('Discord connection test failed - bot will continue but may not be able to post messages');
+      // Don't throw error, just log warning and continue
+    } else {
+      logger.info('Discord connection test successful');
     }
 
     // Initialize and start scheduler
     const scheduler = new Scheduler(phAPI, discordBot, stateManager, timezoneManager);
     await scheduler.start();
+
+    // Connect scheduler to health checker and monitoring server
+    healthChecker.setScheduler(scheduler);
 
     // Start monitoring server
     const port = parseInt(process.env.PORT || '3000');

@@ -25,13 +25,25 @@ export interface HealthStatus {
     fetchTime: string;
     pollInterval: number;
   };
+  scheduler?: {
+    isRunning: boolean;
+    currentDate?: string;
+    totalPolls?: number;
+    lastPollTime?: string;
+    nextPollDelay?: number;
+  };
 }
 
 export class HealthChecker {
   private startTime: number;
+  private scheduler: any = null;
 
   constructor() {
     this.startTime = Date.now();
+  }
+
+  setScheduler(scheduler: any): void {
+    this.scheduler = scheduler;
   }
 
   /**
@@ -46,7 +58,7 @@ export class HealthChecker {
     const usedMemory = memoryUsage.heapUsed;
     const memoryPercentage = (usedMemory / totalMemory) * 100;
 
-    return {
+    const baseStatus = {
       status: this.determineHealthStatus(memoryPercentage),
       timestamp: new Date().toISOString(),
       uptime: Date.now() - this.startTime,
@@ -70,6 +82,24 @@ export class HealthChecker {
         pollInterval: config.time.pollSeconds,
       },
     };
+
+    // Add scheduler status if available
+    if (this.scheduler) {
+      try {
+        const schedulerStatus = this.scheduler.getStatus();
+        (baseStatus as any).scheduler = {
+          isRunning: schedulerStatus.isRunning,
+          currentDate: schedulerStatus.currentSchedule?.date,
+          totalPolls: schedulerStatus.currentSchedule?.totalPolls,
+          lastPollTime: schedulerStatus.currentSchedule?.lastPollTime?.toISO(),
+          nextPollDelay: schedulerStatus.nextPollDelay,
+        };
+      } catch (error) {
+        logger.error('Error getting scheduler status:', error);
+      }
+    }
+
+    return baseStatus;
   }
 
   /**

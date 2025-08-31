@@ -94,6 +94,23 @@ export class Scheduler {
   }
 
   /**
+   * Get current scheduler status
+   */
+  getStatus(): {
+    isRunning: boolean;
+    currentSchedule: DailySchedule | null;
+    adaptiveState: AdaptivePollingState;
+    nextPollDelay?: number;
+  } {
+    return {
+      isRunning: this.isRunning,
+      currentSchedule: this.currentSchedule,
+      adaptiveState: this.adaptiveState,
+      nextPollDelay: this.adaptiveState.currentInterval,
+    };
+  }
+
+  /**
    * Trigger a manual update (for testing/debugging)
    */
   async triggerManualUpdate(): Promise<void> {
@@ -190,10 +207,15 @@ export class Scheduler {
     logger.info('Starting polling loop', {
       date: this.currentSchedule.date,
       initialInterval: this.adaptiveState.currentInterval,
+      pollIntervalSeconds: this.adaptiveState.currentInterval,
     });
 
     // Start the first poll immediately
-    await this.performPoll();
+    try {
+      await this.performPoll();
+    } catch (error) {
+      logger.error('Initial poll failed, but continuing with polling loop:', error);
+    }
 
     // Continue polling until the day ends
     this.scheduleNextPoll();
@@ -223,14 +245,20 @@ export class Scheduler {
 
     this.pollingTimeout = setTimeout(async () => {
       if (this.isRunning) {
-        await this.performPoll();
+        try {
+          await this.performPoll();
+        } catch (error) {
+          logger.error('Poll failed, but continuing with next poll:', error);
+        }
+        // Always schedule next poll, even if current poll failed
         this.scheduleNextPoll();
       }
     }, delayMs);
 
-    logger.debug('Next poll scheduled', {
+    logger.info('Next poll scheduled', {
       delaySeconds: this.adaptiveState.currentInterval,
       nextPollTime: DateTime.now().plus({ seconds: this.adaptiveState.currentInterval }).toISO(),
+      totalPolls: this.currentSchedule.totalPolls,
     });
   }
 
@@ -457,20 +485,4 @@ export class Scheduler {
     return false;
   }
 
-  /**
-   * Get current scheduler status
-   */
-  getStatus(): {
-    isRunning: boolean;
-    currentSchedule: DailySchedule | null;
-    adaptiveState: AdaptivePollingState;
-    nextPollDelay?: number | undefined;
-  } {
-    return {
-      isRunning: this.isRunning,
-      currentSchedule: this.currentSchedule,
-      adaptiveState: this.adaptiveState,
-      nextPollDelay: this.pollingTimeout ? this.adaptiveState.currentInterval : undefined,
-    };
-  }
 }
