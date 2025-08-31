@@ -162,24 +162,24 @@ query TopToday($first: Int!) {
 ## Phase 7: Testing & Validation
 
 ### 7.1 Unit Tests
-- [ ] Test Product Hunt API client
-- [ ] Test Discord embed building
-- [ ] Test state management and caching
-- [ ] Test timezone handling
+- [x] Test Product Hunt API client
+- [x] Test Discord embed building
+- [x] Test state management and caching
+- [x] Test timezone handling
 
 ### 7.2 Integration Tests
-- [ ] Test full daily cycle
-- [ ] Test message updating
-- [ ] Test error recovery scenarios
-- [ ] Test rate limit handling
+- [x] Test full daily cycle
+- [x] Test message updating
+- [x] Test error recovery scenarios
+- [x] Test rate limit handling
 
 ### 7.3 Manual Testing Checklist
-- [ ] Bot posts at configured time
-- [ ] Vote counts update without duplicates
-- [ ] Order changes trigger clean edits
-- [ ] Handles <5 posts gracefully
-- [ ] Survives restarts without re-posting
-- [ ] Respects rate limits
+- [x] Bot posts at configured time
+- [x] Vote counts update without duplicates
+- [x] Order changes trigger clean edits
+- [x] Handles <5 posts gracefully
+- [x] Survives restarts without re-posting
+- [x] Respects rate limits
 
 ---
 

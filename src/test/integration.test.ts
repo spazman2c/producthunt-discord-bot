@@ -251,6 +251,9 @@ describe('Integration Tests', () => {
       const firstShouldUpdate = stateManager.shouldUpdate(currentDate, firstResult.posts);
       expect(firstShouldUpdate).toBe(true);
 
+      // Update state with first result
+      await stateManager.updateDailyState(currentDate, '123456789', firstResult.posts);
+
       // Second poll with same data - should not update
       const secondResult = await mockPhAPI.fetchTopPosts(5);
       const secondShouldUpdate = stateManager.shouldUpdate(currentDate, secondResult.posts);

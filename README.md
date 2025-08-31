@@ -104,6 +104,66 @@ npm run test:state
 # Test Scheduler (requires all services configured)
 npm run test:scheduler
 
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+## Testing
+
+### Automated Testing
+
+The project includes comprehensive automated testing with Jest:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in watch mode (for development)
+npm run test:watch
+
+# Run specific test suites
+npm test -- --testPathPattern=unit
+npm test -- --testPathPattern=integration
+```
+
+### Manual Testing
+
+For manual testing of individual components:
+
+```bash
+# Test Product Hunt API (requires valid PH_TOKEN)
+npm run test:ph
+
+# Test Discord Bot (requires valid DISCORD_TOKEN and DISCORD_CHANNEL_ID)
+npm run test:discord
+
+# Test State Manager
+npm run test:state
+
+# Test Scheduler (requires all services configured)
+npm run test:scheduler
+```
+
+### Test Coverage
+
+Current test coverage includes:
+- ✅ Configuration validation and loading
+- ✅ Timezone management and calculations
+- ✅ State management and caching
+- ✅ Change detection algorithms
+- ✅ Integration workflows
+- ✅ Error handling scenarios
+
+See `TESTING.md` for comprehensive testing guidelines and manual testing checklist.
+
 # Lint code
 npm run lint
 

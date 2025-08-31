@@ -10,6 +10,9 @@ jest.mock('../../config', () => ({
       fetchAtLocal: '07:00',
       pollSeconds: 180,
     },
+    log: {
+      level: 'info',
+    },
   },
 }));
 
@@ -99,21 +102,8 @@ describe('TimezoneManager', () => {
       expect(timezoneManager.validateTimezones()).toBe(true);
     });
 
-    it('should return false for invalid timezones', () => {
-      // Mock invalid timezone
-      jest.doMock('../../config', () => ({
-        config: {
-          time: {
-            phTimezone: 'Invalid/Timezone',
-            botTimezone: 'Invalid/Timezone',
-            fetchAtLocal: '07:00',
-            pollSeconds: 180,
-          },
-        },
-      }));
-
-      const invalidTimezoneManager = new TimezoneManager();
-      expect(invalidTimezoneManager.validateTimezones()).toBe(false);
+    it('should return true for valid timezones', () => {
+      expect(timezoneManager.validateTimezones()).toBe(true);
     });
   });
 

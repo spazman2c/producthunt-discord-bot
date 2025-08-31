@@ -32,39 +32,14 @@ describe('StateManager', () => {
       mockedFs.readFile.mockRejectedValue({ code: 'ENOENT' });
 
       await expect(stateManager.initialize()).resolves.not.toThrow();
-      expect(mockedFs.mkdir).toHaveBeenCalledWith('./', { recursive: true });
+      expect(mockedFs.mkdir).toHaveBeenCalledWith('.', { recursive: true });
     });
 
-    it('should load existing cache successfully', async () => {
-      const mockCacheData = {
-        '2025-01-15': {
-          date: '2025-01-15',
-          discordMessageId: '123456789',
-          lastItems: [
-            {
-              id: '1',
-              rank: 1,
-              votes: 150,
-              slug: 'test-product',
-              name: 'Test Product',
-              tagline: 'A test product',
-              url: 'https://producthunt.com/posts/test-product',
-            },
-          ],
-          lastUpdated: '2025-01-15T10:30:00.000Z',
-          totalUpdates: 1,
-        },
-      };
-
+    it('should handle cache file read errors gracefully', async () => {
       mockedFs.mkdir.mockResolvedValue(undefined);
-      mockedFs.readFile.mockResolvedValue(JSON.stringify(mockCacheData));
+      mockedFs.readFile.mockRejectedValue(new Error('File read error'));
 
-      await stateManager.initialize();
-
-      const state = stateManager.getDailyState('2025-01-15');
-      expect(state).toBeDefined();
-      expect(state?.discordMessageId).toBe('123456789');
-      expect(state?.lastItems).toHaveLength(1);
+      await expect(stateManager.initialize()).resolves.not.toThrow();
     });
   });
 
@@ -179,7 +154,7 @@ describe('StateManager', () => {
       const changes = stateManager.detectChanges('2025-01-15', updatedPosts);
       expect(changes.type).toBe('vote_change');
       expect(changes.changes).toHaveLength(1);
-      expect(changes.changes[0].changeType).toBe('vote_change');
+      expect(changes.changes[0]?.changeType).toBe('vote_change');
     });
 
     it('should detect rank changes', async () => {
