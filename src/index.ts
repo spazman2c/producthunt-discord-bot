@@ -6,6 +6,7 @@ import { StateManager } from './services/state-manager';
 import { Scheduler } from './services/scheduler';
 import { TimezoneManager } from './utils/timezone';
 import { StateManagerConfig } from './types/state';
+import { MonitoringServer } from './server';
 
 async function main(): Promise<void> {
   try {
@@ -78,11 +79,16 @@ async function main(): Promise<void> {
     const scheduler = new Scheduler(phAPI, discordBot, stateManager, timezoneManager);
     await scheduler.start();
 
-    logger.info('Bot initialization complete - Scheduler is running!');
+    // Start monitoring server
+    const monitoringServer = new MonitoringServer(3000);
+    monitoringServer.start();
+
+    logger.info('Bot initialization complete - Scheduler and monitoring server are running!');
     
     // Keep the process running
     process.on('SIGINT', async () => {
       logger.info('Received SIGINT, shutting down gracefully...');
+      monitoringServer.stop();
       await scheduler.stop();
       await discordBot.disconnect();
       await stateManager.shutdown();
@@ -91,6 +97,7 @@ async function main(): Promise<void> {
 
     process.on('SIGTERM', async () => {
       logger.info('Received SIGTERM, shutting down gracefully...');
+      monitoringServer.stop();
       await scheduler.stop();
       await discordBot.disconnect();
       await stateManager.shutdown();

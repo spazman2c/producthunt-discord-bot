@@ -220,20 +220,53 @@ npm run build
 npm start
 ```
 
-### Docker (Coming Soon)
+### Docker
 ```bash
 docker build -t producthunt-discord-bot .
 docker run --env-file .env producthunt-discord-bot
 ```
 
+### Vercel Deployment
+The bot is configured for deployment to Vercel:
+
+1. **Connect Repository**: Link your GitHub repository to Vercel
+2. **Set Environment Variables**: Configure all required environment variables in Vercel dashboard
+3. **Deploy**: Push to main branch for automatic deployment
+
+```bash
+# Manual deployment with Vercel CLI
+npm i -g vercel
+vercel --prod
+
+# Or use the deployment script
+./scripts/deploy.sh
+```
+
+See `monitoring.md` for detailed deployment and monitoring instructions.
+
 ## Monitoring
 
-The bot includes comprehensive logging:
+The bot includes comprehensive monitoring and health checks:
+
+### Health Endpoints
+- **`/health`**: Basic health check for load balancers
+- **`/status`**: Detailed system status and configuration
+- **`/metrics`**: Prometheus-formatted metrics
+
+### Logging
 - Application startup and configuration
 - API requests and responses
 - Discord message operations
 - Error handling and retries
 - Rate limit awareness
+
+### Metrics
+- Uptime tracking
+- Memory usage monitoring
+- Health status indicators
+- Performance metrics
+
+See `monitoring.md` for comprehensive monitoring setup and alerting configuration.
 
 ## Troubleshooting
 
