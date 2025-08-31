@@ -12,6 +12,11 @@ export class ProductHuntAPI {
   private client: GraphQLClient;
 
   constructor() {
+    logger.info('Initializing Product Hunt API client', {
+      apiUrl: config.productHunt.apiUrl,
+      tokenLength: config.productHunt.token?.length || 0,
+    });
+    
     this.client = new GraphQLClient(config.productHunt.apiUrl, {
       headers: {
         Authorization: `Bearer ${config.productHunt.token}`,
@@ -107,6 +112,14 @@ export class ProductHuntAPI {
               ProductHuntGraphQLResponse<ProductHuntPostsResponse>
             >(query, useVariables || {});
 
+            // Log the raw result for debugging
+            logger.debug('Product Hunt API raw result:', {
+              queryVariation: i + 1,
+              resultType: typeof result,
+              resultKeys: Object.keys(result),
+              resultString: JSON.stringify(result, null, 2),
+            });
+
             // Debug: Log the raw response
             logger.debug('Product Hunt API raw response:', {
               queryVariation: i + 1,
@@ -114,6 +127,7 @@ export class ProductHuntAPI {
               errorCount: result.errors?.length || 0,
               hasData: !!result.data,
               responseKeys: Object.keys(result),
+              fullResponse: JSON.stringify(result, null, 2),
             });
 
             // Check for GraphQL errors
@@ -121,6 +135,12 @@ export class ProductHuntAPI {
               const errorMessages = result.errors.map((e) => e.message).join(', ');
               logger.error('Product Hunt GraphQL errors:', result.errors);
               throw new Error(`GraphQL errors: ${errorMessages}`);
+            }
+
+            // Check if the result is an error response (like 401, 403, etc.)
+            if ((result as any).message || (result as any).error || (result as any).status) {
+              logger.error('Product Hunt API error response:', result);
+              throw new Error(`API error: ${(result as any).message || (result as any).error || 'Unknown error'}`);
             }
 
             return result;
