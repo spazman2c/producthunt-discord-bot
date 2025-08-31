@@ -33,8 +33,7 @@
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "graphql-request": "^6.1.0",
-    "luxon": "^3.4.4",
-    "p-retry": "^6.1.0"
+    "luxon": "^3.4.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

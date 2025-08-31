@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
-import pRetry from 'p-retry';
+import { retry } from '../utils/retry';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 import {
@@ -51,7 +51,7 @@ export class ProductHuntAPI {
     try {
       logger.debug('Fetching top posts from Product Hunt', { limit });
 
-      const response = await pRetry(
+      const response = await retry(
         async () => {
           const result = await this.client.request<
             ProductHuntGraphQLResponse<ProductHuntPostsResponse>
@@ -67,13 +67,9 @@ export class ProductHuntAPI {
         },
         {
           retries: 3,
-          onFailedAttempt: (error) => {
-            logger.warn('Product Hunt API request failed, retrying...', {
-              attemptNumber: error.attemptNumber,
-              retriesLeft: error.retriesLeft,
-              error: error.message,
-            });
-          },
+          factor: 2,
+          minTimeout: 1000,
+          maxTimeout: 10000,
         }
       );
 
