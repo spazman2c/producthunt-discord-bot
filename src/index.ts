@@ -80,7 +80,8 @@ async function main(): Promise<void> {
     await scheduler.start();
 
     // Start monitoring server
-    const monitoringServer = new MonitoringServer(3000);
+    const port = parseInt(process.env.PORT || '3000');
+    const monitoringServer = new MonitoringServer(port);
     monitoringServer.start();
 
     logger.info('Bot initialization complete - Scheduler and monitoring server are running!');

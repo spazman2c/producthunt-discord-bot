@@ -6,7 +6,7 @@ export class MonitoringServer {
   private server: http.Server | null = null;
   private port: number;
 
-  constructor(port: number = 3000) {
+  constructor(port: number = parseInt(process.env.PORT || '3000')) {
     this.port = port;
   }
 
