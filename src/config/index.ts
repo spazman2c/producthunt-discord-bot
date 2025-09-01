@@ -34,7 +34,7 @@ function validateConfig(): AppConfig {
       channelId: process.env.DISCORD_CHANNEL_ID!,
     },
     time: {
-      phTimezone: process.env.PH_TIMEZONE || 'America/Los_Angeles',
+      phTimezone: process.env.PH_TIMEZONE || 'America/New_York',
       botTimezone: process.env.BOT_TIMEZONE || 'America/New_York',
       fetchAtLocal: process.env.FETCH_AT_LOCAL || '07:00',
       pollSeconds,
